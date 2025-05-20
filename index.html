@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroIntel - Farming AI Solutions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #16a085;
+            --secondary: #1abc9c;
+            --dark: #34495e;
+            --light: #ecf0f1;
+            --accent: #e74c3c;
+            --soil: #8B4513;
+            --water: #3498db;
+            --crop: #27ae60;
+            --market: #f39c12;
+            --fertilizer: #9b59b6;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(rgba(22, 160, 133, 0.05) 1px, transparent 1px),
+                radial-gradient(rgba(52, 152, 219, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px, 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem 0 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(255,255,255,0.05)" d="M0,100 L100,0 L100,100 Z"></path></svg>');
+            background-size: 50% 100%;
+            background-repeat: no-repeat;
+            background-position: right;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeInDown 1s ease;
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            animation: fadeIn 1.5s ease;
+            font-weight: 300;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin: 4rem 0;
+        }
+
+        .model-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            border-top: 5px solid var(--card-color, var(--primary));
+        }
+
+        .model-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .model-icon {
+            font-size: 3.5rem;
+            color: var(--card-color, var(--primary));
+            margin: 2rem 0 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .model-icon::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--card-color, var(--primary));
+            border-radius: 3px;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        .model-card:hover .model-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .model-card:hover .model-icon::after {
+            width: 70px;
+            opacity: 1;
+        }
+
+        .model-content {
+            padding: 0 2rem 2rem;
+        }
+
+        .model-title {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: var(--dark);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .model-desc {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .model-specs {
+            background: rgba(0,0,0,0.03);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-item {
+            display: flex;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: var(--card-color, var(--primary));
+            min-width: 100px;
+        }
+
+        .spec-value {
+            color: #555;
+            flex-grow: 1;
+        }
+
+        .model-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--card-color, var(--primary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
+        }
+
+        .model-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .model-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .model-btn:hover::after {
+            left: 100%;
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+            clip-path: polygon(0 20%, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .footer-text {
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            color: white;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            opacity: 0.7;
+        }
+
+        .social-link:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+
+        /* Particle animation */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        /* Card specific colors */
+        .card-irrigation {
+            --card-color: var(--water);
+        }
+        .card-crop {
+            --card-color: var(--crop);
+        }
+        .card-fertilizer {
+            --card-color: var(--fertilizer);
+        }
+        .card-market {
+            --card-color: var(--market);
+        }
+        .card-soil {
+            --card-color: var(--soil);
+        }
+
+        /* Glow effects */
+        .model-card:hover {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15), 
+                        0 0 30px -5px var(--card-color, var(--primary));
+        }
+
+        /* 3D tilt effect */
+        .model-card {
+            transition: transform 0.5s ease, box-shadow 0.3s ease;
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--dark);
+            color: white;
+            border: none;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(30deg);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .models-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            header {
+                padding: 2rem 0 3rem;
+                clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+            }
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #121212;
+            background-image: none;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .model-card {
+            background: #1e1e1e;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        body.dark-mode .model-desc,
+        body.dark-mode .spec-value {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .model-title {
+            color: #ffffff;
+        }
+
+        body.dark-mode .model-specs {
+            background: rgba(255,255,255,0.05);
+        }
+
+        body.dark-mode footer {
+            background: #0a0a0a;
+        }
+
+        /* Tooltip for model types */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dashed #999;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>AgroIntel AI</h1>
+            <p class="tagline">Precision agriculture powered by machine learning algorithms</p>
+        </div>
+        <div class="particles" id="particles"></div>
+    </header>
+
+    <div class="container">
+        <div class="models-grid">
+            <!-- Model 1: Irrigation Decision -->
+            <div class="model-card card-irrigation">
+                <div class="model-icon">
+                    <i class="fas fa-tint"></i>
+                </div>
+                <div class="model-content">
+                    <h3 class="model-title">Irrigation Decision Model</h3>
+                    <p class="model-desc">
+                        AI-powered system that calculates optimal irrigation schedules based on real-time soil conditions 
+                        and weather predictions to maximize water efficiency and crop health.
+                    </p>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Inputs:</span>
+                            <span class="spec-value">Soil moisture, weather forecast, crop type</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Output:</span>
+                            <span class="spec-value">Irrigation schedule/water amount</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Algorithm:</span>
+                            <span class="spec-value">
+                                <span class="tooltip">Classification/Regression
+                                    <span class="tooltiptext">Decision Trees, Neural Networks</span>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <a href="https://farmer-irrigation-suggestion-ml.onrender.com" class="model-btn">Access Irrigation Model</a>
+                </div>
+            </div>
+
+            <!-- Model 2: Crop Recommendation -->
+            <div class="model-card card-crop">
+                <div class="model-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <div class="model-content">
+                    <h3 class="model-title">Crop Recommendation Model</h3>
+                    <p class="model-desc">
+                        Recommends the most suitable crops based on comprehensive soil analysis and environmental factors 
+                        to maximize yield and sustainability for each farming season.
+                    </p>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Inputs:</span>
+                            <span class="spec-value">Soil type, pH, weather, rainfall, previous crops</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Output:</span>
+                            <span class="spec-value">Optimal crop(s) to grow</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Algorithm:</span>
+                            <span class="spec-value">
+                                <span class="tooltip">Classification
+                                    <span class="tooltiptext">Random Forest, XGBoost</span>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <a href="https://crop-recommendationml.onrender.com" class="model-btn">Access Crop Model</a>
+                </div>
+            </div>
+
+            <!-- Model 3: Fertilizer Detection -->
+            <div class="model-card card-fertilizer">
+                <div class="model-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div class="model-content">
+                    <h3 class="model-title">Fertilizer Detection Model</h3>
+                    <p class="model-desc">
+                        Advanced detection system that analyzes soil composition to recommend the perfect fertilizer 
+                        blend and application timing for optimal plant nutrition and soil health.
+                    </p>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Inputs:</span>
+                            <span class="spec-value">Soil composition, crop type, growth stage</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Output:</span>
+                            <span class="spec-value">Fertilizer type and dosage</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Algorithm:</span>
+                            <span class="spec-value">Computer Vision + ML</span>
+                        </div>
+                    </div>
+                    <a href="https://fertilizer-recommendation-ml.onrender.com" class="model-btn">Access Fertilizer Model</a>
+                </div>
+            </div>
+
+            <!-- Model 4: Market Price Prediction -->
+            <div class="model-card card-market">
+                <div class="model-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="model-content">
+                    <h3 class="model-title">Market Price Prediction</h3>
+                    <p class="model-desc">
+                        Predictive analytics model that forecasts agricultural commodity prices using historical trends, 
+                        market data, and economic indicators to help farmers maximize profits.
+                    </p>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Inputs:</span>
+                            <span class="spec-value">Historical prices, demand, seasonality</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Output:</span>
+                            <span class="spec-value">Future price predictions</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Algorithm:</span>
+                            <span class="spec-value">Random Forest Regression</span>
+                        </div>
+                    </div>
+                    <a href="https://farmer-market-price-ml.onrender.com" class="model-btn">Access Market Model</a>
+                </div>s
+            </div>
+
+            <!-- Model 5: Soil Type Prediction -->
+            <div class="model-card card-soil">
+                <div class="model-icon">
+                    <i class="fas fa-mountain"></i>
+                </div>
+                <div class="model-content">
+                    <h3 class="model-title">Soil Type Prediction</h3>
+                    <p class="model-desc">
+                        Deep learning model that analyzes soil images and sensor data to classify soil types 
+                        and properties with high accuracy, enabling precise agricultural planning.
+                    </p>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Inputs:</span>
+                            <span class="spec-value">Soil images, sensor data</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Output:</span>
+                            <span class="spec-value">Soil classification</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Algorithm:</span>
+                            <span class="spec-value">CNN Deep Learning</span>
+                        </div>
+                    </div>
+                   <a href="#" class="model-btn" onclick="alertAndRedirect()">Access Soil Model</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">AgroIntel</div>
+                <p class="footer-text">
+                    Transforming agriculture through artificial intelligence and machine learning. 
+                    Our models help farmers make data-driven decisions for sustainable and profitable farming.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script>
+        // Enhanced Particle animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = window.innerWidth < 768 ? 20 : 40;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 5 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 80; // Keep within header
+                const opacity = Math.random() * 0.7 + 0.1;
+                const duration = Math.random() * 15 + 10;
+                const delay = Math.random() * 10;
+                const color = `hsl(${Math.random() * 60 + 160}, 70%, 80%)`;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = opacity;
+                particle.style.background = color;
+                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // 3D tilt effect with improved physics
+        function addTiltEffect() {
+            const cards = document.querySelectorAll('.model-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const angleX = (y - centerY) / 25;
+                    const angleY = (centerX - x) / 25;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.03)`;
+                    card.style.boxShadow = `0 20px 50px -10px rgba(0,0,0,0.2), 
+                                          0 0 40px -5px var(--card-color, var(--primary))`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+                    card.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+                });
+            });
+        }
+        
+        // Dark mode toggle with system preference detection
+        function setupDarkMode() {
+            const toggle = document.getElementById('darkModeToggle');
+            const icon = toggle.querySelector('i');
+            
+            // Check system preference
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Check for saved user preference or use system preference
+            if (localStorage.getItem('darkMode') === 'enabled' || 
+                (localStorage.getItem('darkMode') !== 'disabled' && systemPrefersDark)) {
+                document.body.classList.add('dark-mode');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+            
+            toggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                }
+            });
+        }
+        function alertAndRedirect() {
+    alert("Deployment was not possible due to platform size and subscription limitations; hence, you are being redirected to the GitHub repository.");
+    window.location.href = "https://github.com/Vinil30/Soil_Pred_ML";
+  }
+        // Initialize everything when DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            addTiltEffect();
+            setupDarkMode();
+            
+            // Add staggered animation to cards on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0) scale(1)';
+                        }, index * 150);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.model-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px) scale(0.95)';
+                card.style.transition = `opacity 0.5s ${index * 0.1}s ease, transform 0.5s ${index * 0.1}s ease`;
+                observer.observe(card);
+            });
+            
+            // Add animation to header elements
+            const header = document.querySelector('header');
+            header.style.opacity = '0';
+            header.style.transform = 'translateY(-20px)';
+            header.style.transition = 'opacity 1s ease, transform 1s ease';
+            
+            setTimeout(() => {
+                header.style.opacity = '1';
+                header.style.transform = 'translateY(0)';
+            }, 100);
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const particles = document.getElementById('particles');
+            particles.innerHTML = '';
+            createParticles();
+        });
+    </script>
+</body>
+</html>
