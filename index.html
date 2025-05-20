@@ -490,7 +490,7 @@
                             </span>
                         </div>
                     </div>
-                    <a href="https://farmer-irrigation-suggestion-ml.onrender.com" class="model-btn">Access Irrigation Model</a>
+                    <a href="https://farmer-irrigation-suggestion-ml.onrender.com" class="model-btn" onclick="showAlert(this)">Access Irrigation Model</a>
                 </div>
             </div>
 
@@ -523,7 +523,7 @@
                             </span>
                         </div>
                     </div>
-                    <a href="https://crop-recommendationml.onrender.com" class="model-btn">Access Crop Model</a>
+                    <a href="https://crop-recommendationml.onrender.com" class="model-btn" onclick="showAlert(this)">Access Crop Model</a>
                 </div>
             </div>
 
@@ -552,7 +552,7 @@
                             <span class="spec-value">Computer Vision + ML</span>
                         </div>
                     </div>
-                    <a href="https://fertilizer-recommendation-ml.onrender.com" class="model-btn">Access Fertilizer Model</a>
+                    <a href="https://fertilizer-recommendation-ml.onrender.com" class="model-btn" onclick="showAlert(this)">Access Fertilizer Model</a>
                 </div>
             </div>
 
@@ -581,7 +581,7 @@
                             <span class="spec-value">Random Forest Regression</span>
                         </div>
                     </div>
-                    <a href="https://farmer-market-price-ml.onrender.com" class="model-btn">Access Market Model</a>
+                    <a href="https://farmer-market-price-ml.onrender.com" class="model-btn" onclick="showAlert(this)">Access Market Model</a>
                 </div>s
             </div>
 
@@ -669,7 +669,14 @@
                 particlesContainer.appendChild(particle);
             }
         }
-        
+        function showAlert(link) {
+    alert("The application may take some time to load. Please wait as it is hosted on a free plan.");
+    window.location.href = link.href;
+  }
+     
+
+
+
         // 3D tilt effect with improved physics
         function addTiltEffect() {
             const cards = document.querySelectorAll('.model-card');
